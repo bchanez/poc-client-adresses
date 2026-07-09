@@ -2,12 +2,12 @@ package com.exemple.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exemple.client.domain.Adresse;
-import com.exemple.client.domain.Client;
-import com.exemple.client.persistence.ClientRepository;
-import com.exemple.client.web.ClientDtos.AdresseView;
-import com.exemple.client.web.ClientDtos.ClientView;
-import org.junit.jupiter.api.BeforeEach;
+import com.exemple.client.adapters.primary.web.ClientDtos.AdresseView;
+import com.exemple.client.adapters.primary.web.ClientDtos.ClientView;
+import com.exemple.client.application.domain.models.Adresse;
+import com.exemple.client.application.domain.models.Client;
+import com.exemple.client.application.domain.models.ClientId;
+import com.exemple.client.application.domain.ports.ClientRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,10 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
- * NIVEAU 3 — bout en bout : vrai serveur HTTP → contrôleur → repo → Postgres.
- * On prouve que les adresses arrivent bien jusque dans la réponse JSON servie au
- * front (et pas seulement dans l'entité). C'est la réponse littérale à
- * « comment je teste que l'adresse est bien là, côté front ? ».
+ * NIVEAU 3 — bout en bout : vrai serveur HTTP → contrôleur → port → adapter → Postgres.
+ * On prouve que les adresses arrivent bien jusque dans la réponse JSON servie au front.
+ * C'est la réponse littérale à « comment je teste que l'adresse est bien là, côté front ? ».
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ClientApiE2EIT extends AbstractPostgresIT {
@@ -30,19 +29,14 @@ class ClientApiE2EIT extends AbstractPostgresIT {
     @Autowired
     private ClientRepository clients;
 
-    @BeforeEach
-    void clean() {
-        clients.deleteAll();
-    }
-
     @Test
     void get_client_par_id_renvoie_toutes_ses_adresses() {
-        Client alice = new Client("Alice");
+        Client alice = Client.nouveau("Alice");
         alice.ajouterAdresse(new Adresse("1 rue de la Paix", "Lyon"));
         alice.ajouterAdresse(new Adresse("42 avenue des Tests", "Paris"));
-        Long id = clients.save(alice).getId();
+        ClientId id = clients.save(alice);
 
-        ClientView vue = http.getForObject("/clients/" + id, ClientView.class);
+        ClientView vue = http.getForObject("/clients/" + id.value(), ClientView.class);
 
         assertThat(vue.nom()).isEqualTo("Alice");
         assertThat(vue.adresses())
