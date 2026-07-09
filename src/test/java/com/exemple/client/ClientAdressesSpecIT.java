@@ -2,23 +2,25 @@ package com.exemple.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exemple.client.adapters.primary.web.ClientDtos.AdresseView;
-import com.exemple.client.adapters.primary.web.ClientDtos.ClientView;
-import com.exemple.client.application.domain.models.Adresse;
-import com.exemple.client.application.domain.models.Client;
-import com.exemple.client.application.domain.models.ClientId;
-import com.exemple.client.application.domain.ports.ClientRepository;
+import com.exemple.client.domain.Adresse;
+import com.exemple.client.domain.Client;
+import com.exemple.client.persistence.ClientRepository;
+import com.exemple.client.web.ClientDtos.AdresseView;
+import com.exemple.client.web.ClientDtos.ClientView;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * NIVEAU 2 — le mapping agrégat → DTO front, ET le vrai fond de la question : « et si la
- * spec est ambiguë ? ».
+ * NIVEAU 2 — le mapping vers le DTO front, ET le vrai fond de la question du
+ * collègue : « et si la spec est ambiguë ? ».
  *
- * <p>Le test FORCE à trancher la spec : on ne peut pas écrire l'assertion sans décider quoi
- * afficher. Décision actée — on renvoie TOUTES les adresses, dans une liste, et une liste
- * vide (jamais {@code null}) quand il n'y en a pas. Le test devient la spec exécutable.
+ * <p>Le test FORCE à trancher la spec : on ne peut pas écrire l'assertion sans
+ * décider quoi afficher. Ici la décision est actée — on renvoie TOUTES les
+ * adresses, dans une liste, et une liste vide (jamais {@code null}) quand il n'y
+ * en a pas. Le test devient la spec exécutable : le trou de spec se révèle en
+ * l'écrivant, pas en prod.
  */
 @SpringBootTest
 class ClientAdressesSpecIT extends AbstractPostgresIT {
@@ -26,21 +28,26 @@ class ClientAdressesSpecIT extends AbstractPostgresIT {
     @Autowired
     private ClientRepository clients;
 
+    @BeforeEach
+    void clean() {
+        clients.deleteAll();
+    }
+
     private ClientView relire(Client c) {
-        ClientId id = clients.save(c);
-        return ClientView.de(clients.findById(id).orElseThrow());
+        Long id = clients.save(c).getId();
+        return ClientView.de(clients.findByIdAvecAdresses(id).orElseThrow());
     }
 
     @Test
     void zero_adresse_renvoie_une_liste_vide_pas_null() {
-        ClientView vue = relire(Client.nouveau("Sans adresse"));
+        ClientView vue = relire(new Client("Sans adresse"));
 
         assertThat(vue.adresses()).isNotNull().isEmpty();
     }
 
     @Test
     void une_seule_adresse() {
-        Client c = Client.nouveau("Mono");
+        Client c = new Client("Mono");
         c.ajouterAdresse(new Adresse("1 rue Unique", "Nantes"));
 
         ClientView vue = relire(c);
@@ -50,7 +57,7 @@ class ClientAdressesSpecIT extends AbstractPostgresIT {
 
     @Test
     void plusieurs_adresses_sont_TOUTES_presentes() {
-        Client c = Client.nouveau("Multi");
+        Client c = new Client("Multi");
         c.ajouterAdresse(new Adresse("1 rue A", "Lyon"));
         c.ajouterAdresse(new Adresse("2 rue B", "Paris"));
         c.ajouterAdresse(new Adresse("3 rue C", "Lille"));
