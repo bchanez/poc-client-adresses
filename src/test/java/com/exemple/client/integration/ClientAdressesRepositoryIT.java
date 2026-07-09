@@ -1,4 +1,4 @@
-package com.exemple.client;
+package com.exemple.client.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -9,23 +9,18 @@ import com.exemple.client.persistence.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * NIVEAU 1 — la persistance. La question du collègue : « un client peut avoir
- * plusieurs adresses, comment je teste que l'adresse est bien là ? »
+ * NIVEAU 1 — la persistance. « Un client peut avoir plusieurs adresses, comment je teste
+ * que l'adresse est bien là ? » On écrit un client + 2 adresses, on le RELIT depuis une
+ * vraie base, on vérifie que les 2 adresses reviennent. LE test critique d'une migration
+ * Hibernate : si une adresse « disparaît », il rougit (et il tourne sur Postgres, pas H2).
  *
- * <p>Réponse : on écrit un client + 2 adresses, on le RELIT depuis une vraie base,
- * et on vérifie que les 2 adresses reviennent avec les bonnes valeurs.
- *
- * <p>C'est LE test critique d'une migration Hibernate : le lazy loading, le
- * mapping {@code @OneToMany}, la jointure — c'est ici que ça change de
- * comportement entre versions. Si une adresse « disparaît » après migration,
- * c'est ce test qui l'attrape (et il tourne sur Postgres, pas H2 : les
- * différences de dialecte ne passent pas à travers).
+ * <p>NOTE : le cas « plusieurs adresses reviennent » est un sous-ensemble du round-trip N de
+ * {@link ClientAdressesSpecIT}. On pourrait <b>fusionner</b> les deux. On le garde distinct
+ * ici pour le fil narratif « Niveau 1 persistance » vs « Niveau 2 mapping/spec ».
  */
-@SpringBootTest
-class ClientAdressesRepositoryIT extends AbstractPostgresIT {
+class ClientAdressesRepositoryIT extends AbstractIntegrationIT {
 
     @Autowired
     private ClientRepository clients;
@@ -42,7 +37,6 @@ class ClientAdressesRepositoryIT extends AbstractPostgresIT {
         alice.ajouterAdresse(new Adresse("42 avenue des Tests", "Paris"));
         Long id = clients.save(alice).getId();
 
-        // relecture DEPUIS la base (save a committé ; ceci est une nouvelle transaction)
         Client relu = clients.findByIdAvecAdresses(id).orElseThrow();
 
         assertThat(relu.getAdresses())

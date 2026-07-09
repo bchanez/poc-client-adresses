@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ClientRepository extends JpaRepository<Client, Long> {
+public interface ClientRepository extends JpaRepository<Client, Long>, ClientDao {
 
     /**
      * Recherche par id EN RAMENANT les adresses en une seule requête. Le fetch est piloté
@@ -17,9 +17,10 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
      *
      * <p>Le {@code distinct} garde un seul {@code Client} en résultat malgré le left join
      * sur la collection. {@code findById} (hérité, sans graphe) reste lazy : c'est ce que
-     * verrouille {@code ClientLazyLoadingIT}.
+     * verrouille {@code ClientLazyLoadingIT}. Cette méthode réalise le contrat {@link ClientDao}.
      */
     @EntityGraph(attributePaths = "adresses")
     @Query("select distinct c from Client c where c.id = :id")
+    @Override
     Optional<Client> findByIdAvecAdresses(@Param("id") Long id);
 }

@@ -1,4 +1,4 @@
-package com.exemple.client;
+package com.exemple.client.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,20 +10,13 @@ import com.exemple.client.web.ClientDtos.ClientView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * NIVEAU 2 — le mapping vers le DTO front, ET le vrai fond de la question du
- * collègue : « et si la spec est ambiguë ? ».
- *
- * <p>Le test FORCE à trancher la spec : on ne peut pas écrire l'assertion sans
- * décider quoi afficher. Ici la décision est actée — on renvoie TOUTES les
- * adresses, dans une liste, et une liste vide (jamais {@code null}) quand il n'y
- * en a pas. Le test devient la spec exécutable : le trou de spec se révèle en
- * l'écrivant, pas en prod.
+ * NIVEAU 2 — le mapping vers le DTO front, et le fond de la question : « et si la spec est
+ * ambiguë ? ». Le test FORCE à trancher : on renvoie TOUTES les adresses, liste vide (jamais
+ * {@code null}) quand il n'y en a pas. Le test devient la spec exécutable.
  */
-@SpringBootTest
-class ClientAdressesSpecIT extends AbstractPostgresIT {
+class ClientAdressesSpecIT extends AbstractIntegrationIT {
 
     @Autowired
     private ClientRepository clients;

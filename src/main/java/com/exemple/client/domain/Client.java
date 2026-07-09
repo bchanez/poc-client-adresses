@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -18,6 +17,11 @@ import jakarta.persistence.Table;
  * ouverte. C'est LE piège de la recherche « client par id » — et exactement ce
  * que les tests verrouillent (voir {@code ClientAdressesRepositoryIT} et
  * {@code ClientLazyLoadingIT}).
+ *
+ * <p>La relation est <b>bidirectionnelle</b> : {@code Adresse} est le côté propriétaire
+ * (il porte la FK {@code CLIENT_ID}), et ce côté-ci est en {@code mappedBy}. C'est ce qui
+ * évite les {@code UPDATE} superflus à l'écriture (voir {@link Adresse}). {@link #ajouterAdresse}
+ * synchronise les deux bouts : sans ça, la FK resterait nulle.
  */
 @Entity
 @Table(name = "CLIENT")
@@ -30,8 +34,7 @@ public class Client {
     @Column(name = "NOM", nullable = false)
     private String nom;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "CLIENT_ID")
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Adresse> adresses = new ArrayList<>();
 
     protected Client() {
@@ -42,6 +45,7 @@ public class Client {
     }
 
     public void ajouterAdresse(Adresse adresse) {
+        adresse.attacherA(this);
         this.adresses.add(adresse);
     }
 

@@ -1,4 +1,4 @@
-package com.exemple.client;
+package com.exemple.client.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,19 +10,16 @@ import com.exemple.client.web.ClientDtos.ClientView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
- * NIVEAU 3 — bout en bout : vrai serveur HTTP → contrôleur → repo → Postgres.
- * On prouve que les adresses arrivent bien jusque dans la réponse JSON servie au
- * front (et pas seulement dans l'entité). C'est la réponse littérale à
- * « comment je teste que l'adresse est bien là, côté front ? ».
+ * NIVEAU 3 — bout en bout : vrai serveur HTTP → contrôleur → service → repository → Postgres.
+ * On prouve que les adresses arrivent bien jusque dans la réponse JSON servie au front, et le
+ * 404 si l'id est inconnu.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ClientApiE2EIT extends AbstractPostgresIT {
+class ClientApiE2EIT extends AbstractE2EIT {
 
     @Autowired
     private TestRestTemplate http;
