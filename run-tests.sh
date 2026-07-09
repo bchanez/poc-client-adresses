@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# Lance `mvn verify` du POC dans un conteneur JDK 17 (Hibernate 5.6 n'est pas
-# fiable sur des JDK trop récents).
+# Lance `mvn verify` du POC dans un conteneur JDK 17 (Spring Boot 3 exige Java 17+).
 #
 # Le POC démarre LUI-MÊME son PostgreSQL via Testcontainers — exactement comme
 # dans un vrai `mvn verify`. Pour ça, on monte le socket Docker dans le conteneur
