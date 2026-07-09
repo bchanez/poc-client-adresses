@@ -9,6 +9,9 @@ import org.springframework.test.context.DynamicPropertySource;
  * Base des tests E2E : serveur HTTP réel ({@code webEnvironment = RANDOM_PORT}) + vrai
  * PostgreSQL. On traverse toute la chaîne contrôleur → service → repository → base, comme
  * un vrai appel du front.
+ *
+ * <p>Comme en intégration : pas de transaction, donc chaque test nettoie la base dans son
+ * {@code @BeforeEach} pour rester indépendant des autres.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractE2EIT {

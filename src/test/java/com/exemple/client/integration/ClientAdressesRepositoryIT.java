@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * NIVEAU 1 — la persistance. « Un client peut avoir plusieurs adresses, comment je teste
- * que l'adresse est bien là ? » On écrit un client + 2 adresses, on le RELIT depuis une
- * vraie base, on vérifie que les 2 adresses reviennent. LE test critique d'une migration
- * Hibernate : si une adresse « disparaît », il rougit (et il tourne sur Postgres, pas H2).
+ * NIVEAU 1 — la persistance. On écrit un client et ses 2 adresses, on le RELIT depuis une
+ * vraie base PostgreSQL (pas H2), et on vérifie que les 2 adresses reviennent bien. C'est le
+ * premier test qui casse si une migration Hibernate abîme le mapping : une adresse « perdue »
+ * le fait rougir.
  *
- * <p>NOTE : le cas « plusieurs adresses reviennent » est un sous-ensemble du round-trip N de
- * {@link ClientAdressesSpecIT}. On pourrait <b>fusionner</b> les deux. On le garde distinct
- * ici pour le fil narratif « Niveau 1 persistance » vs « Niveau 2 mapping/spec ».
+ * <p>Ce cas ressemble à « plusieurs adresses » de {@link ClientAdressesSpecIT}, et c'est
+ * voulu : on garde les deux pour raconter deux étapes différentes — ici « ça persiste »
+ * (Niveau 1), là-bas « ça remonte bien dans le DTO envoyé au front » (Niveau 2).
  */
 class ClientAdressesRepositoryIT extends AbstractIntegrationIT {
 
