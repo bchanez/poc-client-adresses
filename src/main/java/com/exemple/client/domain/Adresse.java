@@ -5,11 +5,19 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
-/** Une adresse d'un client. Un client peut en avoir plusieurs (voir {@link Client}). */
+/**
+ * Une adresse d'un client. Un client peut en avoir plusieurs (voir {@link Client}).
+ *
+ * <p>La colonne {@code CLIENT_ID} (créée par le {@code @JoinColumn} côté {@link Client})
+ * est INDEXÉE. Postgres n'indexe pas automatiquement une colonne de clé étrangère :
+ * sans cet index, retrouver les adresses d'un client force un seq scan de toute la
+ * table ADRESSE — insoutenable quand elle atteint des dizaines de millions de lignes.
+ */
 @Entity
-@Table(name = "ADRESSE")
+@Table(name = "ADRESSE", indexes = @Index(name = "idx_adresse_client_id", columnList = "CLIENT_ID"))
 public class Adresse {
 
     @Id
